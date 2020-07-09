@@ -1,2 +1,2 @@
-// export { IMappingsController } from './IMappingsController';
-// export { MappingsController } from './MappingsController';
+export { IMappingController } from './IMappingController';
+export { MappingsController } from './MappingsController';

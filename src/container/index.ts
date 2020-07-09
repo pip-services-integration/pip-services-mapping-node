@@ -1,2 +1,1 @@
-// export { MappingsProcess } from './MappingsProcess';
-// export { MappingsLambdaFunction } from './MappingsLambdaFunction';
+export { MappingsProcess } from './MappingsProcess';
