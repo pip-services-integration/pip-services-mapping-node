@@ -4,7 +4,7 @@ import { Descriptor } from 'pip-services3-commons-node';
 import { MappingsMongoDbPersistence } from '../persistence/MappingsMongoDbPersistence';
 import { MappingsFilePersistence } from '../persistence/MappingsFilePersistence';
 import { MappingsMemoryPersistence } from '../persistence/MappingsMemoryPersistence';
-import { MappingController } from '../logic/MappingController';
+import { MappingsController } from '../logic/MappingsController';
 import { MappingsHttpServiceV1 } from '../services/version1/MappingsHttpServiceV1';
 
 export class MappingsServiceFactory extends Factory {
@@ -20,7 +20,7 @@ export class MappingsServiceFactory extends Factory {
 		this.registerAsType(MappingsServiceFactory.MemoryPersistenceDescriptor, MappingsMemoryPersistence);
 		this.registerAsType(MappingsServiceFactory.FilePersistenceDescriptor, MappingsFilePersistence);
 		this.registerAsType(MappingsServiceFactory.MongoDbPersistenceDescriptor, MappingsMongoDbPersistence);
-		this.registerAsType(MappingsServiceFactory.ControllerDescriptor, MappingController);
+		this.registerAsType(MappingsServiceFactory.ControllerDescriptor, MappingsController);
 		this.registerAsType(MappingsServiceFactory.HttpServiceDescriptor, MappingsHttpServiceV1);
 	}
 	

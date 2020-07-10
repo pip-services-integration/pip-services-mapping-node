@@ -5,7 +5,7 @@ const pip_services3_commons_node_1 = require("pip-services3-commons-node");
 const MappingsMongoDbPersistence_1 = require("../persistence/MappingsMongoDbPersistence");
 const MappingsFilePersistence_1 = require("../persistence/MappingsFilePersistence");
 const MappingsMemoryPersistence_1 = require("../persistence/MappingsMemoryPersistence");
-const MappingController_1 = require("../logic/MappingController");
+const MappingsController_1 = require("../logic/MappingsController");
 const MappingsHttpServiceV1_1 = require("../services/version1/MappingsHttpServiceV1");
 class MappingsServiceFactory extends pip_services3_components_node_1.Factory {
     constructor() {
@@ -13,7 +13,7 @@ class MappingsServiceFactory extends pip_services3_components_node_1.Factory {
         this.registerAsType(MappingsServiceFactory.MemoryPersistenceDescriptor, MappingsMemoryPersistence_1.MappingsMemoryPersistence);
         this.registerAsType(MappingsServiceFactory.FilePersistenceDescriptor, MappingsFilePersistence_1.MappingsFilePersistence);
         this.registerAsType(MappingsServiceFactory.MongoDbPersistenceDescriptor, MappingsMongoDbPersistence_1.MappingsMongoDbPersistence);
-        this.registerAsType(MappingsServiceFactory.ControllerDescriptor, MappingController_1.MappingController);
+        this.registerAsType(MappingsServiceFactory.ControllerDescriptor, MappingsController_1.MappingsController);
         this.registerAsType(MappingsServiceFactory.HttpServiceDescriptor, MappingsHttpServiceV1_1.MappingsHttpServiceV1);
     }
 }

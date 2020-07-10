@@ -5,15 +5,15 @@ let assert = require('chai').assert;
 
 import { MappingsMemoryPersistence } from "../../src/persistence/MappingsMemoryPersistence";
 import { ConfigParams, Descriptor, References, FilterParams, PagingParams } from "pip-services3-commons-node";
-import { MappingController } from "../../src/logic/MappingController";
+import { MappingsController } from "../../src/logic/MappingsController";
 
 suite('Mappings Controller', () => {
     let _persistence: MappingsMemoryPersistence;
-    let _controller: MappingController;
+    let _controller: MappingsController;
 
     setup((done) => {
         _persistence = new MappingsMemoryPersistence();
-        _controller = new MappingController();
+        _controller = new MappingsController();
         _persistence.configure(new ConfigParams());
         var references = References.fromTuples(
             new Descriptor("pip-services-mappings", "persistence", "mock", "default", "1.0"), _persistence

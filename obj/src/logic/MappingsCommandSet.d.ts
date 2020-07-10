@@ -1,8 +1,8 @@
 import { CommandSet } from 'pip-services3-commons-node';
-import { IMappingController } from './IMappingController';
+import { IMappingsController } from './IMappingsController';
 export declare class MappingsCommandSet extends CommandSet {
     private _logic;
-    constructor(logic: IMappingController);
+    constructor(logic: IMappingsController);
     private makeGetCollectionNamesCommand;
     private makeGetMappingsCommand;
     private makeAddMappingCommand;

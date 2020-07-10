@@ -1,13 +1,13 @@
 ﻿import { ConfigParams, FixedRateTimer, IConfigurable, IReferenceable, IOpenable, IReferences, Descriptor } from "pip-services3-commons-node";
 import { CompositeLogger } from "pip-services3-components-node";
-import { IMappingController } from "./IMappingController";
+import { IMappingsController } from "./IMappingsController";
 import { Parameters } from "pip-services3-commons-node";
 
 
 export class MappingProcessor implements IConfigurable, IReferenceable, IOpenable {
     private _logger: CompositeLogger = new CompositeLogger();
     private _timer: FixedRateTimer = new FixedRateTimer();
-    private _controller: IMappingController;
+    private _controller: IMappingsController;
     private _correlationId: string = "Integration.Mapping";
     private _interval: number = 300000;
 
@@ -22,7 +22,7 @@ export class MappingProcessor implements IConfigurable, IReferenceable, IOpenabl
 
     public setReferences(references: IReferences): void {
         this._logger.setReferences(references);
-        this._controller = references.getOneRequired<IMappingController>(new Descriptor("pip-services-mappings", "controller", "default", "*", "1.0"));
+        this._controller = references.getOneRequired<IMappingsController>(new Descriptor("pip-services-mappings", "controller", "default", "*", "1.0"));
     }
 
     public open(correlationId: string, callback: (err: any) => void) {

@@ -9,7 +9,7 @@ import { References } from 'pip-services3-commons-node';
 
 import { MappingV1 } from '../../../src/data/version1/MappingV1';
 import { MappingsMemoryPersistence } from '../../../src/persistence/MappingsMemoryPersistence';
-import { MappingController } from '../../../src/logic/MappingController';
+import { MappingsController } from '../../../src/logic/MappingsController';
 import { MappingsHttpServiceV1 } from '../../../src/services/version1/MappingsHttpServiceV1';
 
 let httpConfig = ConfigParams.fromTuples(
@@ -25,7 +25,7 @@ suite('MappingsHttpServiceV1', () => {
 
     suiteSetup((done) => {
         let persistence = new MappingsMemoryPersistence();
-        let controller = new MappingController();
+        let controller = new MappingsController();
 
         service = new MappingsHttpServiceV1();
         service.configure(httpConfig);

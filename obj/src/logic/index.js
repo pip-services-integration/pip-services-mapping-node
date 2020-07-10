@@ -1,5 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var MappingController_1 = require("./MappingController");
-exports.MappingController = MappingController_1.MappingController;
+var MappingsController_1 = require("./MappingsController");
+exports.MappingsController = MappingsController_1.MappingsController;
 //# sourceMappingURL=index.js.map
