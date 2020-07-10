@@ -5,3 +5,4 @@
 /data/mappings.json
 /obj/test
 /docker/id_rsa*
+.vscode

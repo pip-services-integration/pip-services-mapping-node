@@ -9,12 +9,12 @@ import { TypeCode } from 'pip-services3-commons-node';
 import { FilterParamsSchema } from 'pip-services3-commons-node';
 import { PagingParamsSchema } from 'pip-services3-commons-node';
 
-import { IMappingsController } from './IMappingController';
+import { IMappingController } from './IMappingController';
 
 export class MappingsCommandSet extends CommandSet {
-    private _logic: IMappingsController;
+    private _logic: IMappingController;
 
-    constructor(logic: IMappingsController) {
+    constructor(logic: IMappingController) {
         super();
 
         this._logic = logic;

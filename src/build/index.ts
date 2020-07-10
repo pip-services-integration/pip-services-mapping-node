@@ -1,1 +1,1 @@
-// export { MappingsServiceFactory } from './MappingsServiceFactory';
+export { MappingsServiceFactory } from './MappingsServiceFactory';

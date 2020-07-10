@@ -1,305 +1,172 @@
-// let _ = require('lodash');
-// let async = require('async');
-// let assert = require('chai').assert;
+let _ = require('lodash');
+let async = require('async');
+let assert = require('chai').assert;
 
-// import { FilterParams } from 'pip-services3-commons-node';
-// import { PagingParams } from 'pip-services3-commons-node';
+import { FilterParams } from 'pip-services3-commons-node';
+import { PagingParams } from 'pip-services3-commons-node';
 
-// import { MappingV1 } from '../../src/data/version1/MappingV1';
-// import { MappingTypeV1 } from '../../src/data/version1/MappingTypeV1';
-// import { MappingStateV1 } from '../../src/data/version1/MappingStateV1';
+import { IMappingsPersistence } from '../../src/persistence/IMappingsPersistence';
 
-// import { IMappingsPersistence } from '../../src/persistence/IMappingsPersistence';
-// import { RatingV1 } from '../../src/data/version1/RatingV1';
+export class MappingsPersistenceFixture {
+    private _persistence: IMappingsPersistence;
 
-// let MAPPING1: MappingV1 = {
-//     id: '1',
-//     customer_id: '1',
-//     type: MappingTypeV1.Visa,
-//     number: '4032036094894795',
-//     expire_month: 1,
-//     expire_year: 2021,
-//     first_name: 'Bill',
-//     last_name: 'Gates',
-//     billing_address: {
-//         line1: '2345 Swan Rd',
-//         city: 'Tucson',
-//         state: 'AZ',
-//         postal_code: '85710',
-//         country_code: 'US'
-//     },
-//     ccv: '213',
-//     name: 'Test Mapping 1',
-//     saved: true,
-//     default: true,
-//     state: MappingStateV1.Ok
-// };
-// let MAPPING2: MappingV1 = {
-//     id: '2',
-//     customer_id: '1',
-//     type: MappingTypeV1.Visa,
-//     number: '4032037578262780',
-//     expire_month: 4,
-//     expire_year: 2028,
-//     first_name: 'Joe',
-//     last_name: 'Dow',
-//     billing_address: {
-//         line1: '123 Broadway Blvd',
-//         city: 'New York',
-//         state: 'NY',
-//         postal_code: '123001',
-//         country_code: 'US'
-//     },
-//     name: 'Test Mapping 2',
-//     saved: true,
-//     default: false,
-//     state: MappingStateV1.Expired
-// };
-// let MAPPING3: MappingV1 = {
-//     id: '3',
-//     customer_id: '2',
-//     type: MappingTypeV1.Visa,
-//     number: '4032037578262780',
-//     expire_month: 5,
-//     expire_year: 2022,
-//     first_name: 'Steve',
-//     last_name: 'Jobs',
-//     billing_address: {
-//         line1: '234 6th Str',
-//         city: 'Los Angeles',
-//         state: 'CA',
-//         postal_code: '65320',
-//         country_code: 'US'
-//     },
-//     ccv: '124',
-//     name: 'Test Mapping 2',
-//     state: MappingStateV1.Ok
-// };
+    constructor(persistence) {
+        assert.isNotNull(persistence);
+        this._persistence = persistence;
+    }
 
-// export class MappingsPersistenceFixture {
-//     private _persistence: IMappingsPersistence;
-    
-//     constructor(persistence) {
-//         assert.isNotNull(persistence);
-//         this._persistence = persistence;
-//     }
+    testGetMappingCollections(done) {
+        // Add mappings
+        async.series([
+            // create one Mapping
+            (callback) => {
+                this._persistence.createFromParams(null, "Common.Collection", "123", "789", 60 * 1000, callback);
+            },
+            (callback) => {
+                this._persistence.createFromParams(null, "Common.AnotherCollection", "123", "543", 60 * 1000, callback);
+            },
+            (callback) => {
+                this._persistence.createFromParams(null, "Common.Collection", "ABC", "XYZ", 60 * 1000, callback);
+            },
+            (callback) => {
 
-//     private testCreateMappings(done) {
-//         async.series([
-//         // Create one Mapping
-//             (callback) => {
-//                 this._persistence.create(
-//                     null,
-//                     MAPPING1,
-//                     (err, mapping) => {
-//                         assert.isNull(err);
+                this._persistence.getCollectionNames(null, (err, items) => {
+                    assert.isNull(err);
+                    assert.equal(2, items.length);
+                    assert.include(items, "Common.Collection");
+                    assert.include(items, "Common.AnotherCollection");
+                    callback();
+                });
 
-//                         assert.isObject(mapping);
-//                         assert.equal(mapping.first_name, MAPPING1.first_name);
-//                         assert.equal(mapping.last_name, MAPPING1.last_name);
-//                         assert.equal(mapping.expire_year, MAPPING1.expire_year);
-//                         assert.equal(mapping.customer_id, MAPPING1.customer_id);
+            }], done);
+    }
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Create another Mapping
-//             (callback) => {
-//                 this._persistence.create(
-//                     null,
-//                     MAPPING2,
-//                     (err, mapping) => {
-//                         assert.isNull(err);
+    public testGetMappings(done) {
 
-//                         assert.isObject(mapping);
-//                         assert.equal(mapping.first_name, MAPPING2.first_name);
-//                         assert.equal(mapping.last_name, MAPPING2.last_name);
-//                         assert.equal(mapping.expire_year, MAPPING2.expire_year);
-//                         assert.equal(mapping.customer_id, MAPPING2.customer_id);
+        async.series([
+            (callback) => {
+                // Add mappings
+                this._persistence.createFromParams(null, "Common.Collection", "123", "789", 60 * 1000, callback);
+            },
+            (callback) => {
+                this._persistence.createFromParams(null, "Common.AnotherCollection", "123", "543", 60 * 1000, callback);
+            },
+            (callback) => {
+                this._persistence.createFromParams(null, "Common.Collection", "ABC", "XYZ", 60 * 1000, callback);
+            }, (callback) => {
+                this._persistence.createFromParams(null, "Common.Collection", "AAA", "111", 60 * 1000, callback);
+            },
+            (callback) => {
+                this._persistence.getPageByFilter(null, FilterParams.fromTuples("collection", "Common.Collection"), new PagingParams(1, 10, false), (err, page) => {
+                    assert.isNull(err);
+                    assert.isNotNull(page.data);
+                    assert.equal(2, page.data.length); 
+                    callback();
+                });
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Create yet another Mapping
-//             (callback) => {
-//                 this._persistence.create(
-//                     null,
-//                     MAPPING3,
-//                     (err, mapping) => {
-//                         assert.isNull(err);
+            }], done);
+    }
 
-//                         assert.isObject(mapping);
-//                         assert.equal(mapping.first_name, MAPPING3.first_name);
-//                         assert.equal(mapping.last_name, MAPPING3.last_name);
-//                         assert.equal(mapping.expire_year, MAPPING3.expire_year);
-//                         assert.equal(mapping.customer_id, MAPPING3.customer_id);
 
-//                         callback();
-//                     }
-//                 );
-//             }
-//         ], done);
-//     }
-                
-//     testCrudOperations(done) {
-//         let mapping1: MappingV1;
+    public testMapping(done) {
 
-//         async.series([
-//         // Create items
-//             (callback) => {
-//                 this.testCreateMappings(callback);
-//             },
-//         // Get all Mappings
-//             (callback) => {
-//                 this._persistence.getPageByFilter(
-//                     null,
-//                     new FilterParams(),
-//                     new PagingParams(),
-//                     (err, page) => {
-//                         assert.isNull(err);
+        async.series([
+            // Add mappings
+            (callback) => {
+                this._persistence.createFromParams(null, "Common.Collection", "123", "789", 60 * 1000, callback);
+            }, (callback) => {
+                this._persistence.createFromParams(null, "Common.AnotherCollection", "123", "543", 60 * 1000, callback);
+            }, (callback) => {
+                this._persistence.createFromParams(null, "Common.Collection", "ABC", "XYZ", 60 * 1000, callback);
+            }, (callback) => {
 
-//                         assert.isObject(page);
-//                         assert.lengthOf(page.data, 3);
+                // Test internal mappings
+                this._persistence.getByInternalId(null, "Common.Collection", "123", (err, id) => {
+                    assert.isNull(err);
+                    assert.equal("789", id);
+                    callback();
+                });
 
-//                         mapping1 = page.data[0];
+            }, (callback) => {
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Update the Mapping
-//             (callback) => {
-//                 mapping1.name = 'Updated Mapping 1';
+                // Test external mappings
+                this._persistence.getByExternalId(null, "Common.Collection", "789", (err, id) => {
+                    assert.isNull(err);
+                    assert.equal("123", id);
+                    callback();
+                });
 
-//                 this._persistence.update(
-//                     null,
-//                     mapping1,
-//                     (err, mapping) => {
-//                         assert.isNull(err);
+            }, (callback) => {
+                // Test different collection
+                this._persistence.getByInternalId(null, "Common.AnotherCollection", "123", (err, id) => {
+                    assert.isNull(err);
+                    assert.equal("543", id);
+                    callback();
+                });
 
-//                         assert.isObject(mapping);
-//                         assert.equal(mapping.name, 'Updated Mapping 1');
-//                         // PayPal changes id on update
-//                         //!!assert.equal(mapping.id, mapping1.id);
+            }, (callback) => {
 
-//                         mapping1 = mapping;
+                // Test non-exiting collection
+                this._persistence.getByInternalId(null, "Common.YetAnotherCollection", "123", (err, id) => {
+                    assert.isNull(err);
+                    assert.isNull(id);
+                    callback();
+                });
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Delete Mapping
-//             (callback) => {
-//                 this._persistence.deleteById(
-//                     null,
-//                     mapping1.id,
-//                     (err) => {
-//                         assert.isNull(err);
+            }, (callback) => {
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Try to get delete Mapping
-//             (callback) => {
-//                 this._persistence.getOneById(
-//                     null,
-//                     mapping1.id,
-//                     (err, mapping) => {
-//                         assert.isNull(err);
+                // Test non-exiting mapping
+                this._persistence.getByInternalId(null, "Common.Collection", "555", (err, id) => {
+                    assert.isNull(err);
+                    assert.isNull(id);
+                    callback();
+                });
 
-//                         assert.isNull(mapping || null);
+            }, (callback) => {
 
-//                         callback();
-//                     }
-//                 );
-//             }
-//         ], done);
-//     }
+                // Delete mapping
+                this._persistence.delete(null, "Common.Collection", "123", "789", (err) => {
+                    assert.isNull(err);
+                    this._persistence.getByInternalId(null, "Common.Collection", "123", (e, id) => {
+                        assert.isNull(e);
+                        assert.isNull(id);
+                        callback();
+                    });
 
-//     testGetWithFilter(done) {
-//         async.series([
-//         // Create Mappings
-//             (callback) => {
-//                 this.testCreateMappings(callback);
-//             },
-//         // Get Mappings filtered by customer id
-//             (callback) => {
-//                 this._persistence.getPageByFilter(
-//                     null,
-//                     FilterParams.fromValue({
-//                         customer_id: '1'
-//                     }),
-//                     new PagingParams(),
-//                     (err, page) => {
-//                         assert.isNull(err);
+                });
 
-//                         assert.isObject(page);
-//                         assert.lengthOf(page.data, 2);
+            }], done);
+    }
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Get Mappings by state
-//             (callback) => {
-//                 this._persistence.getPageByFilter(
-//                     null,
-//                     FilterParams.fromValue({
-//                         state: 'ok'
-//                     }),
-//                     new PagingParams(),
-//                     (err, page) => {
-//                         assert.isNull(err);
+    public testExpiredMappings(done) {
+        async.series([
+            (callback) => {
+                // Add mappings
+                this._persistence.createFromParams(null, "Common.Collection", "123", "789", 100, callback);
+            }, (callback) => {
+                this._persistence.createFromParams(null, "Common.Collection", "ABC", "XYZ", 100, callback);
+            }, (callback) => {
+                // Wait to expire
+                setTimeout(() => {
+                    this._persistence.deleteExpired(null, callback);
+                }, 500);
 
-//                         assert.isObject(page);
-//                         // PayPal calculate states by itself
-//                         //assert.lengthOf(page.data, 2);
+            }, (callback) => {
+                // Try to read expired mappings
+                this._persistence.getByInternalId(null, "Common.Collection", "123", (err, id) => {
+                    assert.isNull(err);
+                    assert.isNull(id);
+                    callback();
+                });
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Get Mappings by saved
-//             (callback) => {
-//                 this._persistence.getPageByFilter(
-//                     null,
-//                     FilterParams.fromValue({
-//                         saved: true
-//                     }),
-//                     new PagingParams(),
-//                     (err, page) => {
-//                         assert.isNull(err);
+            }, (callback) => {
+                this._persistence.getByInternalId(null, "Common.Collection", "ABC", (err, id) => {
+                    assert.isNull(err);
+                    assert.isNull(id);
+                    callback();
+                });
 
-//                         assert.isObject(page);
-//                         assert.lengthOf(page.data, 2);
+            }], done);
+    }
 
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Get Mappings by ids
-//             (callback) => {
-//                 this._persistence.getPageByFilter(
-//                     null,
-//                     FilterParams.fromValue({
-//                         ids: ['1', '3']
-//                     }),
-//                     new PagingParams(),
-//                     (err, page) => {
-//                         assert.isNull(err);
-
-//                         assert.isObject(page);
-//                         // PayPal manages ids by itself
-//                         //assert.lengthOf(page.data, 2);
-
-//                         callback();
-//                     }
-//                 );
-//             },
-//         ], done);
-//     }
-
-// }
+}

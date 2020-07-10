@@ -18,7 +18,7 @@ import { MappingsCommandSet } from './MappingsCommandSet';
 import { CompositeLogger, CompositeCounters, Timing } from 'pip-services3-components-node';
 
 
-export class MappingsController implements IConfigurable, IReferenceable, ICommandable, IMappingController {
+export class MappingController implements IConfigurable, IReferenceable, ICommandable, IMappingController {
 
     private static _defaultConfig: ConfigParams = ConfigParams.fromTuples(
         'dependencies.persistence', 'pip-services-mappings:persistence:*:*:1.0'
@@ -28,7 +28,7 @@ export class MappingsController implements IConfigurable, IReferenceable, IComma
 
     private _logger: CompositeLogger = new CompositeLogger();
     private _counters: CompositeCounters = new CompositeCounters();
-    private _dependencyResolver: DependencyResolver = new DependencyResolver(MappingsController._defaultConfig);
+    private _dependencyResolver: DependencyResolver = new DependencyResolver(MappingController._defaultConfig);
     private _persistence: IMappingsPersistence;
     private _commandSet: MappingsCommandSet;
 
