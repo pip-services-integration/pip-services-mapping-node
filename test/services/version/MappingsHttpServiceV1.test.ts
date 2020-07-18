@@ -1,9 +1,11 @@
-let _ = require('lodash');
-let async = require('async');
-let restify = require('restify');
-let assert = require('chai').assert;
+const _ = require('lodash');
+const async = require('async');
+const restify = require('restify');
+const assert = require('chai').assert;
 
-import { ConfigParams, PagingParams, FilterParams } from 'pip-services3-commons-node';
+import { ConfigParams } from 'pip-services3-commons-node';
+import { PagingParams } from 'pip-services3-commons-node';
+import { FilterParams } from 'pip-services3-commons-node';
 import { Descriptor } from 'pip-services3-commons-node';
 import { References } from 'pip-services3-commons-node';
 

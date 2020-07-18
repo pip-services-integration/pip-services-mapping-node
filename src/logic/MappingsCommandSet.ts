@@ -28,7 +28,6 @@ export class MappingsCommandSet extends CommandSet {
         this.addCommand(this.makeDeleteMappingCommand());
     }
 
-
     private makeGetCollectionNamesCommand(): ICommand {
         return new Command(
             "get_collection_names",

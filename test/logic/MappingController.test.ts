@@ -1,10 +1,14 @@
-﻿
-let _ = require('lodash');
-let async = require('async');
-let assert = require('chai').assert;
+﻿const _ = require('lodash');
+const async = require('async');
+const assert = require('chai').assert;
+
+import { ConfigParams } from "pip-services3-commons-node";
+import { Descriptor } from "pip-services3-commons-node";
+import { References } from "pip-services3-commons-node";
+import { FilterParams } from "pip-services3-commons-node";
+import { PagingParams } from "pip-services3-commons-node";
 
 import { MappingsMemoryPersistence } from "../../src/persistence/MappingsMemoryPersistence";
-import { ConfigParams, Descriptor, References, FilterParams, PagingParams } from "pip-services3-commons-node";
 import { MappingsController } from "../../src/logic/MappingsController";
 
 suite('Mappings Controller', () => {
@@ -15,7 +19,7 @@ suite('Mappings Controller', () => {
         _persistence = new MappingsMemoryPersistence();
         _controller = new MappingsController();
         _persistence.configure(new ConfigParams());
-        var references = References.fromTuples(
+        let references = References.fromTuples(
             new Descriptor("pip-services-mappings", "persistence", "mock", "default", "1.0"), _persistence
         );
         _controller.setReferences(references);
@@ -36,7 +40,6 @@ suite('Mappings Controller', () => {
             }, (callback) => {
                 _controller.addMapping(null, "Common.Collection", "ABC", "XYZ", 60 * 1000, callback);
             }, (callback) => {
-
                 _controller.getCollectionNames(null, (err, items) => {
                     assert.isNull(err);
                     assert.equal(2, items.length);
@@ -44,13 +47,11 @@ suite('Mappings Controller', () => {
                     assert.include(items, "Common.AnotherCollection");
                     callback();
                 });
-
-            }], done);
+            }
+        ], done);
     });
 
-
     test('Test Get Mappings', (done) => {
-
         async.series([// Add mappings
             (callback) => {
                 _controller.addMapping(null, "Common.Collection", "123", "789", 60 * 1000, callback);
@@ -68,12 +69,11 @@ suite('Mappings Controller', () => {
                     callback();
                 });
 
-            }], done);
+            }
+        ], done);
     });
 
-
     test('TestMapping', (done) => {
-
         async.series([
             // Add mappings
             (callback) => {
@@ -123,12 +123,11 @@ suite('Mappings Controller', () => {
                     callback();
                 });
 
-            }], done);
+            }
+        ], done);
     });
 
-
     test('Test Expired Mappings', (done) => {
-
         async.series([
             // Add mappings
             (callback) => {
@@ -141,7 +140,6 @@ suite('Mappings Controller', () => {
                 setTimeout(() => {
                     _controller.deleteExpiredMappings(null, callback);
                 }, 500);
-
             }, (callback) => {
                 // Try to read expired mappings
                 _controller.mapToExternal(null, "Common.Collection", "123", (err, id) => {
@@ -149,15 +147,14 @@ suite('Mappings Controller', () => {
                     assert.isNull(id);
                     callback();
                 });
-
             }, (callback) => {
                 _controller.mapToExternal(null, "Common.Collection", "ABC", (err, id) => {
                     assert.isNull(err);
                     assert.isNull(id);
                     callback();
                 });
-
-            }], done);
+            }
+        ], done);
     });
 
 });

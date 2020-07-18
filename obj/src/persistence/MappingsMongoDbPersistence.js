@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 let _ = require('lodash');
 const pip_services3_commons_node_1 = require("pip-services3-commons-node");
 const pip_services3_mongodb_node_1 = require("pip-services3-mongodb-node");
-const MappingV1_1 = require("../data/version1/MappingV1");
 class MappingsMongoDbPersistence extends pip_services3_mongodb_node_1.IdentifiableMongoDbPersistence {
     constructor() {
         super('mappings');
@@ -12,13 +11,13 @@ class MappingsMongoDbPersistence extends pip_services3_mongodb_node_1.Identifiab
     composeFilter(filter) {
         filter = filter || new pip_services3_commons_node_1.FilterParams();
         let criteria = [];
-        var collection = filter.getAsNullableString("collection");
-        var id = filter.getAsNullableString("id");
-        var internalId = filter.getAsNullableString("internal_id");
-        var externalId = filter.getAsNullableString("external_id");
-        var search = filter.getAsNullableString("search");
+        let collection = filter.getAsNullableString("collection");
+        let id = filter.getAsNullableString("id");
+        let internalId = filter.getAsNullableString("internal_id");
+        let externalId = filter.getAsNullableString("external_id");
+        let search = filter.getAsNullableString("search");
         if (id != null) {
-            var searchFilter = [];
+            let searchFilter = [];
             searchFilter.push({ external_id: id });
             searchFilter.push({ internal_id: id });
             criteria.push({ $or: searchFilter });
@@ -45,9 +44,14 @@ class MappingsMongoDbPersistence extends pip_services3_mongodb_node_1.Identifiab
     }
     createFromParams(correlationId, collection, internalId, externalId, ttl, callback) {
         ttl = ttl > 0 ? ttl : this._defaultTTL;
-        var mapping = new MappingV1_1.MappingV1(collection, internalId, externalId, new Date(Date.now() + ttl));
-        mapping.id = this.makeId(collection, internalId, externalId);
-        super.create(correlationId, mapping, callback);
+        let mapping = {
+            id: this.makeId(collection, internalId, externalId),
+            collection: collection,
+            internal_id: internalId,
+            external_id: externalId,
+            expiration_time: new Date(new Date().getTime() + ttl)
+        };
+        super.set(correlationId, mapping, callback);
     }
     getCollectionNames(correlationId, callback) {
         this._collection.aggregate([
@@ -59,18 +63,19 @@ class MappingsMongoDbPersistence extends pip_services3_mongodb_node_1.Identifiab
                 callback(err, null);
                 return;
             }
-            var items = [];
-            for (var item of results) {
+            let items = [];
+            for (let item of results) {
                 items.push(item._id);
             }
             callback(null, items);
         });
     }
     getByInternalId(correlationId, collection, internalId, callback) {
-        var filter = [];
-        filter.push({ collection: collection });
-        filter.push({ internal_id: internalId });
-        super.getListByFilter(correlationId, { $and: filter }, null, null, (err, items) => {
+        let filter = {
+            collection: collection,
+            internal_id: internalId
+        };
+        super.getListByFilter(correlationId, filter, null, null, (err, items) => {
             if (err) {
                 callback(err, null);
                 return;
@@ -79,10 +84,11 @@ class MappingsMongoDbPersistence extends pip_services3_mongodb_node_1.Identifiab
         });
     }
     getByExternalId(correlationId, collection, externalId, callback) {
-        var filter = [];
-        filter.push({ collection: collection });
-        filter.push({ external_id: externalId });
-        super.getListByFilter(correlationId, { $and: filter }, null, null, (err, items) => {
+        let filter = {
+            collection: collection,
+            external_id: externalId
+        };
+        super.getListByFilter(correlationId, filter, null, null, (err, items) => {
             if (err) {
                 callback(err, null);
                 return;
@@ -91,12 +97,12 @@ class MappingsMongoDbPersistence extends pip_services3_mongodb_node_1.Identifiab
         });
     }
     delete(correlationId, collection, internalId, externalId, callback) {
-        var id = this.makeId(collection, internalId, externalId);
+        let id = this.makeId(collection, internalId, externalId);
         super.deleteById(correlationId, id, callback);
     }
     deleteExpired(correlationId, callback) {
-        var now = new Date();
-        var filter = { expiration_time: { $lte: now } };
+        let now = new Date();
+        let filter = { expiration_time: { $lte: now } };
         super.deleteByFilter(correlationId, filter, callback);
     }
 }

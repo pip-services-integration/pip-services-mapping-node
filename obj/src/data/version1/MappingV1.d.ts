@@ -5,5 +5,4 @@ export declare class MappingV1 implements IStringIdentifiable {
     internal_id: string;
     external_id: string;
     expiration_time: Date;
-    constructor(collection?: string, internalId?: string, externalId?: string, expirationTime?: Date);
 }

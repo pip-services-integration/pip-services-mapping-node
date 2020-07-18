@@ -10,5 +10,4 @@ export interface IMappingsPersistence {
     getByExternalId(correlationId: string, collection: string, externalId: string, callback: (err: any, internalId: string) => void): void;
     delete(correlationId: string, collection: string, internalId: string, externalId: string, callback: (err: any) => void): void;
     deleteExpired(correlationId: string, callback: (err: any) => void): void;
-    clear(correlationId: string, callback: (err: any) => void): void;
 }

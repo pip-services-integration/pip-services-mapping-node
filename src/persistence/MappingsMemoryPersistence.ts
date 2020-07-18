@@ -1,4 +1,4 @@
-let _ = require('lodash');
+const _ = require('lodash');
 
 import { FilterParams } from 'pip-services3-commons-node';
 import { PagingParams } from 'pip-services3-commons-node';
@@ -18,87 +18,23 @@ export class MappingsMemoryPersistence
         super();
     }
 
-    getCollectionNames(correlationId: string, callback: (err: any, items: string[]) => void): void {
-        var result = new Array<string>();
-        for (var mapping of this._items) {
-            var collection = mapping.collection;
+    public getCollectionNames(correlationId: string, callback: (err: any, items: string[]) => void): void {
+        let result: string[] = [];
+        for (let mapping of this._items) {
+            let collection = mapping.collection;
             if (result.indexOf(collection) < 0)
                 result.push(collection);
         }
         callback(null, result);
     }
 
-
-    createFromParams(correlationId: string, collection: string, internalId: string, externalId: string, timeToLive: number, callback: (err: any, item: MappingV1) => void): void {
-        var mapping: MappingV1;
-        timeToLive = timeToLive > 0 ? timeToLive : this._defaultTTL;
-        mapping = new MappingV1
-            (
-                collection,
-                internalId,
-                externalId,
-                new Date(Date.now() + timeToLive)
-            );
-
-        super.create(correlationId, mapping, callback);
-    }
-
-
-    getByInternalId(correlationId: string, collection: string, internalId: string, callback: (err: any, externalId: string) => void): void {
-        var result: string = null;
-
-        var items = _.filter(this._items, (m) => {
-            return collection.localeCompare(m.collection) == 0 && internalId.localeCompare(m.internal_id) == 0
-        });
-        var mapping: MappingV1 = items.length > 0 ? items[0] : null;
-        result = mapping != null && mapping.expiration_time > new Date() ? mapping.external_id : null;
-        callback(null, result);
-    }
-
-
-    getByExternalId(correlationId: string, collection: string, externalId: string, callback: (err: any, internalId: string) => void): void {
-        var result: string = null;
-        var items = _.filter(this._items, (m) => {
-            return collection.localeCompare(m.collection) == 0 && externalId.localeCompare(m.external_id) == 0
-        });
-        var mapping: MappingV1 = items.length > 0 ? items[0] : null;
-        result = mapping != null && mapping.expiration_time > new Date() ? mapping.internal_id : null;
-        callback(null, result);
-    }
-
-    delete(correlationId: string, collection: string, internalId: string, externalId: string, callback: (err: any) => void): void {
-
-        for (var index = this._items.length - 1; index >= 0; index--) {
-            var mapping = this._items[index];
-            if (mapping.collection == collection
-                && mapping.internal_id == internalId
-                && mapping.external_id == externalId) {
-                this._items.splice(index, 1);
-                break;
-            }
-        }
-
-        callback(null);
-    }
-
-    deleteExpired(correlationId: string, callback: (err: any) => void): void {
-        var now: Date = new Date();
-        for (var index = this._items.length - 1; index >= 0; index--) {
-            if (this._items[index].expiration_time <= now) {
-                this._items.splice(index, 1);
-            }
-        }
-        callback(null);
-    }
-
     private composeFilter(filter: FilterParams): any {
-
         filter = filter || new FilterParams();
-        var collection = filter.getAsNullableString("collection");
-        var id = filter.getAsNullableString("id");
-        var internalId = filter.getAsNullableString("internal_id");
-        var externalId = filter.getAsNullableString("external_id");
-        var search = filter.getAsNullableString("search");
+        let collection = filter.getAsNullableString("collection");
+        let id = filter.getAsNullableString("id");
+        let internalId = filter.getAsNullableString("internal_id");
+        let externalId = filter.getAsNullableString("external_id");
+        let search = filter.getAsNullableString("search");
 
         return (item: MappingV1) => {
             if (collection != null && item.collection != collection)
@@ -118,6 +54,67 @@ export class MappingsMemoryPersistence
     public getPageByFilter(correlationId: string, filter: FilterParams, paging: PagingParams,
         callback: (err: any, page: DataPage<MappingV1>) => void): void {
         super.getPageByFilter(correlationId, this.composeFilter(filter), paging, null, null, callback);
+    }
+
+    public createFromParams(correlationId: string, collection: string, internalId: string, externalId: string, timeToLive: number,
+        callback: (err: any, item: MappingV1) => void): void {
+        let mapping: MappingV1;
+        timeToLive = timeToLive > 0 ? timeToLive : this._defaultTTL;
+        mapping = <MappingV1>{
+            collection: collection,
+            internal_id: internalId,
+            external_id: externalId,
+            expiration_time: new Date(new Date().getTime() + timeToLive)
+        };
+
+        super.create(correlationId, mapping, callback);
+    }
+
+    public getByInternalId(correlationId: string, collection: string, internalId: string,
+        callback: (err: any, externalId: string) => void): void {
+        let result: string = null;
+
+        let items = _.filter(this._items, (m) => {
+            return collection.localeCompare(m.collection) == 0 && internalId.localeCompare(m.internal_id) == 0
+        });
+        let mapping: MappingV1 = items.length > 0 ? items[0] : null;
+        result = mapping != null && mapping.expiration_time > new Date() ? mapping.external_id : null;
+        callback(null, result);
+    }
+
+    public getByExternalId(correlationId: string, collection: string, externalId: string, callback: (err: any, internalId: string) => void): void {
+        let result: string = null;
+        let items = _.filter(this._items, (m) => {
+            return collection.localeCompare(m.collection) == 0 && externalId.localeCompare(m.external_id) == 0
+        });
+        let mapping: MappingV1 = items.length > 0 ? items[0] : null;
+        result = mapping != null && mapping.expiration_time > new Date() ? mapping.internal_id : null;
+        callback(null, result);
+    }
+
+    public delete(correlationId: string, collection: string, internalId: string, externalId: string,
+        callback: (err: any) => void): void {
+        for (let index = this._items.length - 1; index >= 0; index--) {
+            let mapping = this._items[index];
+            if (mapping.collection == collection
+                && mapping.internal_id == internalId
+                && mapping.external_id == externalId) {
+                this._items.splice(index, 1);
+                break;
+            }
+        }
+
+        callback(null);
+    }
+
+    public deleteExpired(correlationId: string, callback: (err: any) => void): void {
+        let now = new Date().getTime();
+        for (let index = this._items.length - 1; index >= 0; index--) {
+            if (this._items[index].expiration_time.getTime() <= now) {
+                this._items.splice(index, 1);
+            }
+        }
+        callback(null);
     }
 
 }

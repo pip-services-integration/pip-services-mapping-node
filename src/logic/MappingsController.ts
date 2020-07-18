@@ -1,5 +1,3 @@
-let async = require('async');
-
 import { ConfigParams } from 'pip-services3-commons-node';
 import { IConfigurable } from 'pip-services3-commons-node';
 import { IReferences } from 'pip-services3-commons-node';
@@ -10,38 +8,39 @@ import { PagingParams } from 'pip-services3-commons-node';
 import { DataPage } from 'pip-services3-commons-node';
 import { ICommandable } from 'pip-services3-commons-node';
 import { CommandSet } from 'pip-services3-commons-node';
+import { IOpenable } from 'pip-services3-commons-node';
+
+import { CompositeLogger } from 'pip-services3-components-node';
+import { FixedRateTimer } from 'pip-services3-commons-node';
 
 import { MappingV1 } from '../data/version1/MappingV1';
 import { IMappingsPersistence } from '../persistence/IMappingsPersistence';
 import { IMappingsController } from './IMappingsController';
 import { MappingsCommandSet } from './MappingsCommandSet';
-import { CompositeLogger, CompositeCounters, Timing } from 'pip-services3-components-node';
 
-
-export class MappingsController implements IConfigurable, IReferenceable, ICommandable, IMappingsController {
-
+export class MappingsController implements IConfigurable, IReferenceable, ICommandable, IOpenable, IMappingsController {
     private static _defaultConfig: ConfigParams = ConfigParams.fromTuples(
         'dependencies.persistence', 'pip-services-mappings:persistence:*:*:1.0'
     );
 
-    public readonly component: string = "Integration.MappingController";
-
-    private _logger: CompositeLogger = new CompositeLogger();
-    private _counters: CompositeCounters = new CompositeCounters();
     private _dependencyResolver: DependencyResolver = new DependencyResolver(MappingsController._defaultConfig);
     private _persistence: IMappingsPersistence;
     private _commandSet: MappingsCommandSet;
 
-    public constructor() {
-        this._dependencyResolver = new DependencyResolver(
-            ConfigParams.fromTuples("dependencies.persistence", "pip-services-mappings:persistence:*:*:1.0"));
-    }
+    private _logger: CompositeLogger = new CompositeLogger();
+    private _timer: FixedRateTimer = new FixedRateTimer();
+    private _interval: number = 300000;
+
+    public constructor() {}
 
     public configure(config: ConfigParams): void {
+        this._logger.configure(config);
         this._dependencyResolver.configure(config);
+        this._interval = config.getAsIntegerWithDefault("options.interval", this._interval);
     }
 
     public setReferences(references: IReferences): void {
+        this._logger.setReferences(references);
         this._dependencyResolver.setReferences(references);
         this._persistence = this._dependencyResolver.getOneRequired<IMappingsPersistence>("persistence");
     }
@@ -50,95 +49,59 @@ export class MappingsController implements IConfigurable, IReferenceable, IComma
         return this._commandSet || (this._commandSet = new MappingsCommandSet(this));
     }
 
-
-    protected instrument(correlationId: string, methodName: string, message: string): Timing {
-        this._logger.trace(correlationId, "Executed %s.%s %s", this.component, methodName, message);
-        return this._counters.beginTiming(this.component + "." + methodName + ".exec_time");
+    public isOpen(): boolean {
+        return this._timer != null && this._timer.isStarted();
     }
 
-    protected handleError(correlationId: string, methodName: string, ex: any): void {
-        this._logger.error(correlationId, ex, "Failed to execute %s.%s", this.component, methodName);
-    }
-
-
-    getCollectionNames(correlationId: string, callback: (err: any, items: string[]) => void) {
-        var time = this.instrument(correlationId, "getCollectionNames", "");
-        this._persistence.getCollectionNames(correlationId, (err, items) => {
-            time.endTiming();
-            if (err) {
-                this.handleError(correlationId, "getCollectionNames", err);
-            }
-            callback(err, items);
+    public open(correlationId: string, callback: (err: any) => void) {
+        this._timer.setDelay(this._interval);
+        this._timer.setInterval(this._interval);
+        this._timer.setCallback(() => {
+            this._logger.info(correlationId, 'Cleaning expired mappings.');
+            this.deleteExpiredMappings(correlationId, (err) => {
+                if (err)
+                    this._logger.error(correlationId, err, 'Failed to clean expired mappings');
+            });
         });
+        this._timer.start();
+        callback(null);
     }
 
-
-    getMappings(correlationId: string, filter: FilterParams, paging: PagingParams, callback: (err: any, page: DataPage<MappingV1>) => void) {
-        var time = this.instrument(correlationId, "getMappings", "");
-        this._persistence.getPageByFilter(correlationId, filter, paging, (err, page) => {
-            time.endTiming();
-            if (err) {
-                this.handleError(correlationId, "getMappings", err);
-            }
-            callback(err, page);
-        });
+    public close(correlationId: string, callback: (err: any) => any) {
+        this._timer.stop();
+        callback(null);
     }
 
-    addMapping(correlationId: string, collection: string, internalId: string, externalId: string, timeToLive: number, callback: (err: any) => void) {
-        var time = this.instrument(correlationId, "addMapping", "");
-        this._persistence.createFromParams(correlationId, collection, internalId, externalId, timeToLive, (err, item) => {
-            time.endTiming();
-            if (err) {
-                this.handleError(correlationId, "addMapping", err);
-            }
-            callback(err);
-
-        });
+    public getCollectionNames(correlationId: string, callback: (err: any, items: string[]) => void) {
+        this._persistence.getCollectionNames(correlationId, callback);
     }
 
-
-    mapToExternal(correlationId: string, collection: string, internalId: string, callback: (err: any, externalId: string) => void) {
-        var time = this.instrument(correlationId, "mapToExternal", "");
-        this._persistence.getByInternalId(correlationId, collection, internalId, (err, id) => {
-            time.endTiming();
-            if (err) {
-                this.handleError(correlationId, "mapToExternal", err);
-            }
-            callback(err, id);
-        });
+    public getMappings(correlationId: string, filter: FilterParams, paging: PagingParams,
+        callback: (err: any, page: DataPage<MappingV1>) => void) {
+        this._persistence.getPageByFilter(correlationId, filter, paging, callback);
     }
 
-    mapToInternal(correlationId: string, collection: string, externalId: string, callback: (err: any, internalId: string) => void) {
-        var time = this.instrument(correlationId, "mapToInternal", "");
-        this._persistence.getByExternalId(correlationId, collection, externalId, (err, id) => {
-            time.endTiming();
-            if (err) {
-                this.handleError(correlationId, "mapToInternal", err);
-            }
-            callback(err, id);
-        });
+    public addMapping(correlationId: string, collection: string,
+        internalId: string, externalId: string, timeToLive: number,
+        callback: (err: any) => void) {
+        this._persistence.createFromParams(correlationId, collection, internalId, externalId, timeToLive, callback);
     }
 
-    deleteMapping(correlationId: string, collection: string, internalId: string, externalId: string, callback: (err: any) => void) {
-        var time = this.instrument(correlationId, "deleteMapping", "");
-        this._persistence.delete(correlationId, collection, internalId, externalId, (err) => {
-            time.endTiming();
-            if (err) {
-                this.handleError(correlationId, "deleteMapping", err);
-            }
-            callback(err);
-        });
+    public mapToExternal(correlationId: string, collection: string, internalId: string,
+        callback: (err: any, externalId: string) => void) {
+        this._persistence.getByInternalId(correlationId, collection, internalId, callback);
     }
 
-    deleteExpiredMappings(correlationId: string, callback: (err: any) => void) {
-        var time = this.instrument(correlationId, "deleteExpiredMappings", "");
-        this._persistence.deleteExpired(correlationId, (err) => {
-            time.endTiming();
-            if (err) {
-                this.handleError(correlationId, "deleteExpiredMappings", err);
-            }
-            callback(err);
-        });
+    public mapToInternal(correlationId: string, collection: string, externalId: string, callback: (err: any, internalId: string) => void) {
+        this._persistence.getByExternalId(correlationId, collection, externalId, callback);
+    }
+
+    public deleteMapping(correlationId: string, collection: string, internalId: string, externalId: string, callback: (err: any) => void) {
+        this._persistence.delete(correlationId, collection, internalId, externalId, callback);
+    }
+
+    public deleteExpiredMappings(correlationId: string, callback: (err: any) => void) {
+        this._persistence.deleteExpired(correlationId, callback);
     }
 }
 

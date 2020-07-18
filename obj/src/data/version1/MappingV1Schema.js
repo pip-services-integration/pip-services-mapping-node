@@ -9,7 +9,7 @@ class MappingV1Schema extends pip_services3_commons_node_1.ObjectSchema {
         this.withRequiredProperty('collection', pip_services3_commons_node_2.TypeCode.String);
         this.withRequiredProperty('internal_id', pip_services3_commons_node_2.TypeCode.String);
         this.withRequiredProperty('external_id', pip_services3_commons_node_2.TypeCode.String);
-        this.withRequiredProperty('expiration_time', null);
+        this.withRequiredProperty('expiration_time', pip_services3_commons_node_2.TypeCode.DateTime);
     }
 }
 exports.MappingV1Schema = MappingV1Schema;
