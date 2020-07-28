@@ -31,7 +31,7 @@ export class MappingsCommandSet extends CommandSet {
     private makeGetCollectionNamesCommand(): ICommand {
         return new Command(
             "get_collection_names",
-            new ObjectSchema(),
+            new ObjectSchema(true),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {
                 this._logic.getCollectionNames(correlationId, callback);
             });
@@ -40,7 +40,7 @@ export class MappingsCommandSet extends CommandSet {
     private makeGetMappingsCommand(): ICommand {
         return new Command(
             "get_mappings",
-            new ObjectSchema()
+            new ObjectSchema(true)
                 .withOptionalProperty("filter", new FilterParamsSchema())
                 .withOptionalProperty("paging", new PagingParamsSchema()),
             (correlationId: string, args: Parameters, callback: (err: any, result: any) => void) => {

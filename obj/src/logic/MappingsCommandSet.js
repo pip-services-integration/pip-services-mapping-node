@@ -21,12 +21,12 @@ class MappingsCommandSet extends pip_services3_commons_node_1.CommandSet {
         this.addCommand(this.makeDeleteMappingCommand());
     }
     makeGetCollectionNamesCommand() {
-        return new pip_services3_commons_node_2.Command("get_collection_names", new pip_services3_commons_node_5.ObjectSchema(), (correlationId, args, callback) => {
+        return new pip_services3_commons_node_2.Command("get_collection_names", new pip_services3_commons_node_5.ObjectSchema(true), (correlationId, args, callback) => {
             this._logic.getCollectionNames(correlationId, callback);
         });
     }
     makeGetMappingsCommand() {
-        return new pip_services3_commons_node_2.Command("get_mappings", new pip_services3_commons_node_5.ObjectSchema()
+        return new pip_services3_commons_node_2.Command("get_mappings", new pip_services3_commons_node_5.ObjectSchema(true)
             .withOptionalProperty("filter", new pip_services3_commons_node_7.FilterParamsSchema())
             .withOptionalProperty("paging", new pip_services3_commons_node_8.PagingParamsSchema()), (correlationId, args, callback) => {
             var filter = pip_services3_commons_node_3.FilterParams.fromValue(args.get("filter"));
