@@ -22,7 +22,7 @@ This microservice has no dependencies on other microservices.
   - [HTTP Version 1](doc/HttpProtocolV1.md)
  
 
-## Contract
+# Contract
 
 Logical contract of the microservice is presented below. For physical implementation (HTTP/REST, Thrift, Seneca, Lambda, etc.),
 please, refer to documentation of the specific protocol.
@@ -53,7 +53,7 @@ interface IMappingsController {
 
 Right now the only way to get the microservice is to check it out directly from github repository
 ```bash
-git clone git@github.com:pip-services-integration/pip-services-mappings-node.git
+git clone git@github.com:pip-services-integration/pip-clients-mappings-node.git
 ```
 
 Pip.Service team is working to implement packaging and make stable releases available for your 
@@ -92,7 +92,7 @@ Start the microservice using the command:
 node run
 ```
 
-## Use
+## Install
 
 The easiest way to work with the microservice is to use client SDK. 
 The complete list of available client SDKs for different languages is listed in the [Quick Links](#links)
@@ -110,6 +110,144 @@ If you use Node.js then you should add dependency to the client SDK into **packa
 ```
 
 
+## Use
+
+Inside your code get the reference to the client SDK
+```typescript
+ import { MappingsHttpClientV1 } from 'pip-clients-mappings-node';
+```
+
+Define client configuration parameters.
+
+```typescript
+// Client configuration
+var httpConfig = ConfigParams.fromTuples(
+    "connection.protocol", "http",
+    "connection.host", "localhost",
+    "connection.port", 3000
+);
+client.configure(httpConfig);
+```
+
+Instantiate the client and open connection to the microservice
+```typescript
+// Create the client instance
+client = new MappingsHttpClientV1();
+
+// Connect to the microservice
+client.open(null, function(err) {
+    if (err) {
+        console.error('Connection to the microservice failed');
+        console.error(err);
+        return;
+    }
+    
+    // Work with the microservice
+    ...
+});
+```
+Now the client is ready to perform operations:
+
+Add mapping:
+```typescript 
+client.addMapping("123", "Common.Collection", "123", "789", 60 * 1000, (err, mapping) => {
+  if (err != null) {
+    console.error('Can\'t create mapping!');
+    console.error(err);
+  } else {
+    console.dir('Mapping was created successfull');
+  }
+});
+```
+
+Get mappings by filter:
+```typescript    
+
+    client.getMappings("123", new FilterParams(), new PagingParams(), (err, page) => {
+        if (err != null) {
+            console.error('Can\'t get mappings!');
+            console.error(err);
+        } else {
+            console.dir('Mappings was recived successfull');
+            for (let mapping in page.data) {
+                console.dir('Mappings:');
+                console.dir(mapping.toString());
+            }
+        }
+    });
+
+    client.getMappings(null, FilterParams.fromTuples("collection", "Common.Collection"), 
+      new PagingParams(1, 10, false),  (err, page) => {
+        if (err != null) {
+            console.error('Can\'t get mappings!');
+            console.error(err);
+        } else {
+            console.dir('Mappings was recived successfull');
+            for (let mapping in page.data) {
+                console.dir('Mappings:');
+                console.dir(mapping.toString());
+            }
+        }
+    });
+
+```
+
+Delete mapping:
+```typescript    
+
+    client.deleteMappingById("123", "Common.Collection", "123", "789", (err) => {
+        if (err != null) {
+            console.error('Can\'t delete mapping!');
+            console.error(err);
+        } else {
+            console.dir('Mapping was delete successfull');
+        }
+    });
+```
+
+## Control functions
+
+Get collection names:
+```typescript
+    client.getCollectionNames("123", (err, collections) => {
+        if (err != null) {
+            bconsole.error('Can\'t get collection names');
+            console.error(err);
+        } else {
+            console.dir('Collections names:');
+            console.dir(collections);
+        }
+    });
+```
+
+Get external id by collection name and internal id:
+```typescript
+    client.mapToExternal("123", "Common.Collection", "123", (err, id) => {
+        if (err != null) {
+            console.error('Can\'t get external id!');
+            console.error(err);
+        } else {
+            console.dir('External id:', id);
+        }
+    });
+```
+
+Get internal id by collection name and external id:
+```typescript
+    client.mapToInternal("123", "Common.Collection", "789", (err, id)) => {
+        if (err != null) {
+            console.error('Can\'t compleate mapping!');
+            console.error(err);
+        } else {
+            console.dir('Internal id:', id);
+            }
+    }); 
+```
+
+
 ## Acknowledgements
 
-This microservice was created and currently maintained by *Sergey Seroukhov*.
+This microservice was created and currently maintained by 
+- *Sergey Seroukhov*.
+- *Levichev Dmitry*
+
